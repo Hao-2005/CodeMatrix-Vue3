@@ -4,12 +4,12 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 
 const navItems = [
-  { label: '主页', path: '/', icon: '🏠' },
-  { label: '功能点度量', path: '/fp', icon: '⊞' },
-  { label: '类图辅助度量', path: '/class-diagram', icon: '🖥' },
-  { label: '用例点辅助度量', path: '/use-case', icon: '📋' },
-  { label: '控制流图辅助度量', path: '/control-flow', icon: '↗' },
-  { label: '代码辅助度量', path: '/code-metric', icon: '</>' },
+  { label: '主页', path: '/', icon: new URL('/src/assets/home.png', import.meta.url).href, iconType: 'img' },
+  { label: '功能点度量', path: '/fp', icon: new URL('/src/assets/function.png', import.meta.url).href, iconType: 'img' },
+  { label: '类图辅助度量', path: '/class-diagram', icon: new URL('/src/assets/UML.png', import.meta.url).href, iconType: 'img' },
+  { label: '用例点辅助度量', path: '/use-case', icon: new URL('/src/assets/case.png', import.meta.url).href, iconType: 'img' },
+  //{ label: '控制流图辅助度量', path: '/control-flow', icon: '↗' },
+  { label: '代码辅助度量', path: '/code-metric', icon: new URL('/src/assets/code.png', import.meta.url).href, iconType: 'img' },
 ]
 </script>
 
@@ -33,7 +33,10 @@ const navItems = [
         class="nav-item"
         :class="{ active: route.path === item.path }"
       >
-        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-icon">
+          <img v-if="item.iconType === 'img'" :src="item.icon" alt="" />
+          <template v-else>{{ item.icon }}</template>
+        </span>
         <span class="nav-label">{{ item.label }}</span>
       </router-link>
     </nav>
@@ -121,6 +124,13 @@ const navItems = [
   width: 20px;
   text-align: center;
   flex-shrink: 0;
+}
+
+.nav-icon img {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .nav-label {
