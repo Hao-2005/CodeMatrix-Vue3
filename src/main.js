@@ -7,6 +7,7 @@ import FPMeasure from './components/FPMeasure.vue'
 import CodeMetricPage from './components/CodeMetricPage.vue'
 import UseCaseMeasurePage from './components/UseCaseMeasurePage.vue'
 import CKMeasurePage from './components/CKMeasurePage.vue'
+import AIOptimizePage from './components/AIOptimizePage.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -17,6 +18,7 @@ const router = createRouter({
     { path: '/use-case', component: UseCaseMeasurePage },
     { path: '/control-flow', component: { template: '<div class="page-placeholder"><h2>控制流图辅助度量</h2><p>页面建设中...</p></div>' } },
     { path: '/code-metric', component: CodeMetricPage },
+    { path: '/ai-optimize', component: AIOptimizePage },
   ]
 })
 
