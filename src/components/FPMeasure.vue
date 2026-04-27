@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 import * as echarts from 'echarts'
+import AIChatPanel from './AIChatPanel.vue'
 
 // ==================== TAB ====================
 const activeTab = ref('UFP')
@@ -285,6 +286,17 @@ function showTooltip(key, event) {
   }
 }
 function hideTooltip() { hoveredVaf.value = null }
+
+const fpMetricPayload = computed(() => ({
+  projectName: '软件度量平台',
+  metricSystem: 'IFPUG',
+  context: '功能点估算与复核',
+  metrics: {
+    UFP: UFP.value,
+    VAF: VAF.value,
+    FP: FP.value,
+  },
+}))
 </script>
 
 <template>
@@ -422,6 +434,15 @@ function hideTooltip() { hoveredVaf.value = null }
         <div class="tooltip-desc">{{ vafItems.find(i => i.key === hoveredVaf)?.desc }}</div>
       </div>
     </teleport>
+
+    <AIChatPanel
+      :suggestions="[
+        { label: '什么是IFPUG度量', type: 'chat' },
+        { label: '分析功能点度量结果', type: 'metric' },
+      ]"
+      :metric-payload="fpMetricPayload"
+      welcome-message="你好，有问题可以随时问我！"
+    />
   </div>
 </template>
 

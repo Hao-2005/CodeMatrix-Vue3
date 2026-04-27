@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as echarts from 'echarts'
+import AIChatPanel from './AIChatPanel.vue'
 
 const router = useRouter()
 
@@ -216,6 +217,28 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeCharts)
   disposeCharts()
 })
+
+const ckMetricPayload = computed(() => {
+  const metricsObj = {}
+
+  ckData.value.forEach((cls, index) => {
+    const i = index + 1
+
+    metricsObj[`WMC${i}`] = cls.wmc ?? '-'
+    metricsObj[`RFC${i}`] = cls.rfc ?? '-'
+    metricsObj[`DIT${i}`] = cls.dit ?? '-'
+    metricsObj[`NOC${i}`] = cls.noc ?? '-'
+    metricsObj[`LCOM${i}`] = cls.lcom ?? '-'
+    metricsObj[`CBO${i}`] = cls.cbo ?? '-'
+  })
+
+  return {
+    projectName: '软件度量平台',
+    metricSystem: 'CK',
+    context: '类图CK度量分析',
+    metrics: metricsObj,
+  }
+})
 </script>
 
 <template>
@@ -223,8 +246,8 @@ onBeforeUnmount(() => {
 
     <header class="page-toolbar">
       <div class="title-block">
-        <h1 class="page-title">代码辅助度量</h1>
-        <p class="page-subtitle">上传代码文件后，系统会自动展示源码预览、代码行统计和方法信息。</p>
+        <h1 class="page-title">面向对象度量</h1>
+        <p class="page-subtitle">上传xml文件后，系统会自动进行CK度量。</p>
       </div>
       <button v-if="hasFile" class="ai-btn" @click="goToAIOptimize">
         <span class="ai-btn-icon">✨</span> AI 优化代码
@@ -367,6 +390,14 @@ onBeforeUnmount(() => {
       </div>
     </div>
 
+    <AIChatPanel
+      :suggestions="[
+        { label: '什么是CK度量', type: 'chat' },
+        { label: '分析CK度量结果', type: 'metric' },
+      ]"
+      :metric-payload="ckMetricPayload"
+      welcome-message="您好，有什么可以帮助您？"
+    />
   </div>
 </template>
 

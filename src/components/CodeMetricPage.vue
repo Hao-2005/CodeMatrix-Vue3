@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import axios from 'axios'
 import * as echarts from 'echarts'
+import AIChatPanel from './AIChatPanel.vue'
 
 const selectedFile = ref(null)
 const previewContent = ref([])
@@ -244,6 +245,18 @@ watch(
 onBeforeUnmount(() => {
   disposeCharts()
 })
+
+const codeMetricPayload = computed(() => ({
+  projectName: '软件度量平台',
+  metricSystem: 'Code',
+  context: '版本发布前代码规模评估',
+  metrics: {
+    注释行数:    metrics.value.annoLines,
+    非注释行数:  metrics.value.codeLines,
+    物理代码行数: metrics.value.allLines,
+    逻辑代码行数: metrics.value.logicLines,
+  },
+}))
 </script>
 
 <template>
@@ -387,6 +400,15 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+
+    <AIChatPanel
+      :suggestions="[
+        { label: '什么是代码度量', type: 'chat' },
+        { label: '分析代码度量结果', type: 'metric' },
+      ]"
+      :metric-payload="codeMetricPayload"
+      welcome-message="您好，有什么可以帮助您？"
+    />
   </div>
 </template>
 

@@ -2,6 +2,7 @@
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import axios from 'axios'
 import * as echarts from 'echarts'
+import AIChatPanel from './AIChatPanel.vue'
 
 const selectedFile = ref(null)
 const isAnalyzing = ref(false)
@@ -374,6 +375,20 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeCharts)
   disposeCharts()
 })
+
+const ucMetricPayload = computed(() => ({
+  projectName: '软件度量平台',
+  metricSystem: 'UseCasePoint',
+  context: '需求阶段用例点估算',
+  metrics: {
+    总角色数: actorSummary.value.totalActorNum,
+    总用例数: actorSummary.value.totalUseCaseNum,
+    UUCP: UUCP.value,
+    TCF:  TCF.value,
+    EF:   EF.value,
+    UPC:  UPC.value,
+  },
+}))
 </script>
 
 <template>
@@ -648,6 +663,15 @@ onBeforeUnmount(() => {
         </div>
       </div>
     </section>
+
+    <AIChatPanel
+      :suggestions="[
+        { label: '什么是用例点分析方法', type: 'chat' },
+        { label: '分析用例点分析结果', type: 'metric' },
+      ]"
+      :metric-payload="ucMetricPayload"
+      welcome-message="您好，有什么可以帮助您？"
+    />
   </div>
 </template>
 
