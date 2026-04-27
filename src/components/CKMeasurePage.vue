@@ -1,7 +1,10 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as echarts from 'echarts'
+
+const router = useRouter()
 
 const selectedFile = ref(null)
 const fileContent  = ref('')
@@ -202,7 +205,13 @@ watch(ckData, async () => {
   renderParallelChart()
 })
 
-window.addEventListener('resize', resizeCharts)
+function goToAIOptimize() {
+  router.push({
+    path: '/ai-optimize',
+    query: { filename: filename.value, originalCode: fileContent.value }
+  })
+}
+
 onBeforeUnmount(() => {
   window.removeEventListener('resize', resizeCharts)
   disposeCharts()
@@ -217,6 +226,9 @@ onBeforeUnmount(() => {
         <h1 class="page-title">代码辅助度量</h1>
         <p class="page-subtitle">上传代码文件后，系统会自动展示源码预览、代码行统计和方法信息。</p>
       </div>
+      <button v-if="hasFile" class="ai-btn" @click="goToAIOptimize">
+        <span class="ai-btn-icon">✨</span> AI 优化代码
+      </button>
     </header>
 
     <!-- 上传前：英雄区（左描述 + 右上传窗口） -->
@@ -369,8 +381,36 @@ onBeforeUnmount(() => {
 .page-toolbar {
   display: flex;
   align-items: flex-start;
+  justify-content: space-between;
   padding: 18px 8px 4px;
 }
+
+.ai-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 22px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.28);
+  transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.ai-btn:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(124, 58, 237, 0.38);
+}
+
+.ai-btn-icon { font-size: 16px; }
 
 .title-block { display: flex; flex-direction: column; gap: 8px; }
 
