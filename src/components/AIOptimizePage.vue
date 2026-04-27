@@ -9,9 +9,10 @@ const router = useRouter()
 
 const originalCode  = ref(route.query.originalCode || '')
 const originalFile  = ref(route.query.filename || '')
-const optimizedCode = ref('')
-const aiLoading     = ref(false)
-const aiError       = ref('')
+const optimizedCode    = ref('')
+const aiExplanation    = ref('')
+const aiLoading        = ref(false)
+const aiError          = ref('')
 
 const saveLoading   = ref(false)
 const savedFilename = ref('')
@@ -59,6 +60,7 @@ async function requestAIOptimize() {
   aiLoading.value = true
   aiError.value   = ''
   optimizedCode.value = ''
+  aiExplanation.value = ''
   savedFilename.value = ''
   ckOriginal.value    = []
   ckOptimized.value   = []
@@ -68,7 +70,8 @@ async function requestAIOptimize() {
       code:     originalCode.value,
       filename: originalFile.value,
     })
-    optimizedCode.value = res.data?.data ?? res.data?.optimizedCode ?? ''
+    optimizedCode.value = res.data?.data?.code ?? ''
+    aiExplanation.value = res.data?.data?.explanation ?? ''
   } catch {
     aiError.value = 'AI 优化请求失败，请确认后端 AI 接口已启动。'
   } finally {
@@ -101,8 +104,11 @@ async function saveAndAnalyze() {
       axios.post('http://localhost:8080/api/ck/ck?name=' + originalFile.value),
       axios.post('http://localhost:8080/api/ck/ck?name=' + savedFilename.value),
     ])
+    console.log('origRes.data:', JSON.stringify(origRes.data))
+    console.log('optRes.data:', JSON.stringify(optRes.data))
     ckOriginal.value  = origRes.data?.data ?? []
     ckOptimized.value = optRes.data?.data  ?? []
+    console.log('ckOriginal:', ckOriginal.value.length, 'ckOptimized:', ckOptimized.value.length)
   } catch {
     saveError.value = '保存或 CK 分析失败，请确认后端已启动。'
   } finally {
@@ -245,7 +251,13 @@ function deltaClass(m) {
             <div class="loading-dots"><span></span><span></span><span></span></div>
             <p>AI 正在分析并优化代码，请稍候…</p>
           </div>
-          <pre v-else class="code-block">{{ optimizedCode || '（点击"开始 AI 优化"生成优化代码）' }}</pre>
+          <div v-else class="optimized-split">
+            <pre class="code-block split-code">{{ optimizedCode || '（点击"开始 AI 优化"生成优化代码）' }}</pre>
+            <div class="explanation-block split-explanation">
+              <div class="explanation-header">优化说明</div>
+              <p class="explanation-text">{{ aiExplanation || '（AI 优化后将在此显示优化说明）' }}</p>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -444,7 +456,7 @@ function deltaClass(m) {
   display: grid;
   grid-template-columns: 1fr 32px 1fr;
   gap: 0;
-  min-height: 420px;
+  height: 560px;
 }
 
 .code-panel {
@@ -452,6 +464,40 @@ function deltaClass(m) {
   flex-direction: column;
   gap: 10px;
   overflow: hidden;
+  min-width: 0;
+}
+
+.optimized-split {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid #e6ecf5;
+}
+
+.split-code {
+  flex: 1;
+  border-radius: 12px 12px 0 0;
+  border: none;
+  border-bottom: 1px solid #e6ecf5;
+  overflow: auto;
+}
+
+.split-explanation {
+  flex: 1;
+  border-radius: 0 0 12px 12px;
+  border: none;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.split-explanation .explanation-text {
+  flex: 1;
+  overflow-y: auto;
 }
 
 .panel-header {
@@ -492,6 +538,30 @@ function deltaClass(m) {
   white-space: pre;
   overflow: auto;
   max-height: 520px;
+}
+
+.explanation-block {
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 1px solid #dbeafe;
+  background: #eff6ff;
+  overflow: hidden;
+}
+.explanation-header {
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1d4ed8;
+  background: #dbeafe;
+  letter-spacing: 0.02em;
+}
+.explanation-text {
+  margin: 0;
+  padding: 12px 14px;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #1e3a5f;
+  white-space: pre-wrap;
 }
 
 .divider-col {
