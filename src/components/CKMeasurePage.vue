@@ -4,6 +4,7 @@ import { useRouter } from 'vue-router'
 import axios from 'axios'
 import * as echarts from 'echarts'
 import AIChatPanel from './AIChatPanel.vue'
+import UmlClassDiagram from './UmlClassDiagram.vue'
 
 const router = useRouter()
 
@@ -15,6 +16,7 @@ const isFetching   = ref(false)
 const uploadError  = ref('')
 const fetchError   = ref('')
 const ckData       = ref([])
+const previewMode  = ref('uml')   // 'uml' | 'raw'
 
 const radarChartRef    = ref(null)
 const parallelChartRef = ref(null)
@@ -292,10 +294,26 @@ const ckMetricPayload = computed(() => {
 
       <aside class="file-preview card">
         <div class="section-header">
-          <h2>文件内容预览</h2>
+          <h2>UML 类图预览</h2>
           <span class="file-chip">{{ selectedFile?.name }}</span>
         </div>
-        <pre class="code-preview">{{ fileContent }}</pre>
+
+        <!-- Tab 切换：类图 / 原始 XML -->
+        <div class="preview-tabs">
+          <button
+            class="preview-tab"
+            :class="{ active: previewMode === 'uml' }"
+            @click="previewMode = 'uml'"
+          >类图</button>
+          <button
+            class="preview-tab"
+            :class="{ active: previewMode === 'raw' }"
+            @click="previewMode = 'raw'"
+          >原始XML</button>
+        </div>
+
+        <UmlClassDiagram v-if="previewMode === 'uml'" :xml-content="fileContent" />
+        <pre v-else class="code-preview">{{ fileContent }}</pre>
       </aside>
 
       <div class="right-panel">
@@ -544,7 +562,7 @@ const ckMetricPayload = computed(() => {
 /* 上传后分栏 */
 .split-layout {
   display: grid;
-  grid-template-columns: 380px 1fr;
+  grid-template-columns: 480px 1fr;
   gap: 18px;
   align-items: start;
 }
@@ -833,5 +851,35 @@ const ckMetricPayload = computed(() => {
 
 @media (max-width: 768px) {
   .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+/* 预览模式 Tab */
+.preview-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.preview-tab {
+  padding: 5px 14px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  color: #3b5998;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.preview-tab.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.preview-tab:hover:not(.active) {
+  background: #eff6ff;
+  border-color: #93c5fd;
 }
 </style>

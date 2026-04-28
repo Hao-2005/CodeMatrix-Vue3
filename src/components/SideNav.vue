@@ -6,10 +6,10 @@ const route = useRoute()
 const navItems = [
   { label: '主页', path: '/', icon: new URL('/src/assets/home.png', import.meta.url).href, iconType: 'img' },
   { label: '功能点度量', path: '/fp', icon: new URL('/src/assets/function.png', import.meta.url).href, iconType: 'img' },
-  { label: '类图辅助度量', path: '/class-diagram', icon: new URL('/src/assets/UML.png', import.meta.url).href, iconType: 'img' },
-  { label: '用例点辅助度量', path: '/use-case', icon: new URL('/src/assets/case.png', import.meta.url).href, iconType: 'img' },
+  { label: '用例点度量', path: '/use-case', icon: new URL('/src/assets/case.png', import.meta.url).href, iconType: 'img' },
+  { label: '面向对象度量', path: '/class-diagram', icon: new URL('/src/assets/UML.png', import.meta.url).href, iconType: 'img' },
   //{ label: '控制流图辅助度量', path: '/control-flow', icon: '↗' },
-  { label: '代码辅助度量', path: '/code-metric', icon: new URL('/src/assets/code.png', import.meta.url).href, iconType: 'img' },
+  { label: '代码度量', path: '/code-metric', icon: new URL('/src/assets/code.png', import.meta.url).href, iconType: 'img' },
 ]
 </script>
 
@@ -45,7 +45,7 @@ const navItems = [
 
 <style scoped>
 .sidebar {
-  width: 220px;
+  width: 200px;
   min-height: 100vh;
   background: linear-gradient(180deg, #1e2d4a 0%, #243352 100%);
   display: flex;

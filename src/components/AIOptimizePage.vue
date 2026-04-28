@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
 import * as echarts from 'echarts'
+import UmlClassDiagram from './UmlClassDiagram.vue'
 
 const route  = useRoute()
 const router = useRouter()
@@ -25,6 +26,8 @@ const ckOptimized   = ref([])
 
 const radarOrigRef  = ref(null)
 const radarOptRef   = ref(null)
+const previewModeOrig = ref('uml')   // 'uml' | 'raw'
+const previewModeOpt  = ref('uml')   // 'uml' | 'raw'
 let radarOrigChart  = null
 let radarOptChart   = null
 
@@ -228,12 +231,22 @@ function deltaClass(m) {
     <!-- 代码对比区 -->
     <section class="compare-card card">
       <div class="compare-grid">
+
+        <!-- ── 左侧：原始代码 ── -->
         <div class="code-panel">
           <div class="panel-header">
             <span class="panel-badge original">原始代码</span>
             <span class="panel-filename">{{ originalFile }}</span>
+            <div class="preview-tabs" style="margin-left: auto;">
+              <button class="preview-tab" :class="{ active: previewModeOrig === 'uml' }" @click="previewModeOrig = 'uml'">类图</button>
+              <button class="preview-tab" :class="{ active: previewModeOrig === 'raw' }" @click="previewModeOrig = 'raw'">XML</button>
+            </div>
           </div>
-          <pre class="code-block">{{ originalCode || '（暂无代码）' }}</pre>
+          <div class="panel-body">
+            <UmlClassDiagram v-if="previewModeOrig === 'uml' && originalCode" :xml-content="originalCode" />
+            <div v-else-if="previewModeOrig === 'uml' && !originalCode" class="uml-empty-hint">（暂无代码）</div>
+            <pre v-else class="code-block">{{ originalCode || '（暂无代码）' }}</pre>
+          </div>
         </div>
 
         <div class="divider-col">
@@ -242,23 +255,37 @@ function deltaClass(m) {
           <div class="divider-line"></div>
         </div>
 
+        <!-- ── 右侧：AI 优化后 ── -->
         <div class="code-panel">
           <div class="panel-header">
             <span class="panel-badge optimized">AI 优化后</span>
             <span v-if="savedFilename" class="panel-filename">{{ savedFilename }}</span>
+            <div v-if="!aiLoading && optimizedCode" class="preview-tabs" style="margin-left: auto;">
+              <button class="preview-tab" :class="{ active: previewModeOpt === 'uml' }" @click="previewModeOpt = 'uml'">类图</button>
+              <button class="preview-tab" :class="{ active: previewModeOpt === 'raw' }" @click="previewModeOpt = 'raw'">XML</button>
+            </div>
           </div>
+
+          <!-- AI 加载中 -->
           <div v-if="aiLoading" class="loading-placeholder">
             <div class="loading-dots"><span></span><span></span><span></span></div>
             <p>AI 正在分析并优化代码，请稍候…</p>
           </div>
+
+          <!-- 有优化结果 -->
           <div v-else class="optimized-split">
-            <pre class="code-block split-code">{{ optimizedCode || '（点击"开始 AI 优化"生成优化代码）' }}</pre>
+            <div class="panel-body split-code-panel">
+              <UmlClassDiagram v-if="previewModeOpt === 'uml' && optimizedCode" :xml-content="optimizedCode" />
+              <div v-else-if="previewModeOpt === 'uml' && !optimizedCode" class="uml-empty-hint">（点击"开始 AI 优化"生成优化代码）</div>
+              <pre v-else class="code-block split-code">{{ optimizedCode || '（点击"开始 AI 优化"生成优化代码）' }}</pre>
+            </div>
             <div class="explanation-block split-explanation">
               <div class="explanation-header">优化说明</div>
               <p class="explanation-text">{{ aiExplanation || '（AI 优化后将在此显示优化说明）' }}</p>
             </div>
           </div>
         </div>
+
       </div>
 
       <div v-if="hasOptimized && !savedFilename" class="analyze-bar">
@@ -750,5 +777,64 @@ function deltaClass(m) {
   .divider-line { flex: 1; height: 1px; width: auto; }
   .charts-grid  { grid-template-columns: 1fr; }
   .detail-grid  { grid-template-columns: 1fr; }
+}
+/* ── UML 预览面板 ── */
+.panel-body {
+  flex: 1;
+  overflow: auto;
+  border-radius: 12px;
+  border: 1px solid #e6ecf5;
+  background: #f9fbff;
+  padding: 12px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.split-code-panel {
+  flex: 2;
+  border-radius: 12px 12px 0 0;
+  border-bottom: 1px solid #e6ecf5;
+  overflow: auto;
+}
+
+.uml-empty-hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 120px;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Tab 切换按钮 */
+.preview-tabs {
+  display: flex;
+  gap: 5px;
+}
+
+.preview-tab {
+  padding: 4px 12px;
+  border-radius: 8px;
+  border: 1px solid #dbeafe;
+  background: #f8fbff;
+  color: #3b5998;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.preview-tab.active {
+  background: #3b82f6;
+  border-color: #3b82f6;
+  color: white;
+}
+
+.preview-tab:hover:not(.active) {
+  background: #eff6ff;
+  border-color: #93c5fd;
 }
 </style>
